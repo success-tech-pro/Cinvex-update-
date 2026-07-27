@@ -159,6 +159,12 @@ a{text-decoration:none;color:inherit;}
 .nav-links a.active::after{
   content:'';position:absolute;left:0;bottom:-8px;width:100%;height:2px;background:var(--red);
 }
+.nav-badge{
+  background:var(--red);color:#fff;font-size:.62rem;font-weight:800;
+  border-radius:10px;padding:.05rem .4rem;margin-left:.3rem;vertical-align:middle;
+  display:none;
+}
+.nav-badge.show{display:inline-block;}
 .search-wrap{position:relative;}
 .search-input{
   background:var(--black-3);
@@ -376,6 +382,32 @@ a{text-decoration:none;color:inherit;}
 }
 .mylist-btn:hover{border-color:#fff;background:rgba(255,255,255,.25);}
 .mylist-btn.active{background:var(--red);border-color:var(--red);}
+
+/* ---------- Downloads page ---------- */
+.downloads-grid{display:flex;flex-direction:column;gap:.7rem;}
+.download-row{
+  display:flex;align-items:center;gap:1rem;background:var(--black-2);
+  border:1px solid var(--border);border-radius:10px;padding:.7rem;
+  animation:cardFadeIn .4s ease both;
+}
+.download-row img{
+  width:56px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#0d0d0d;
+}
+.download-info{flex:1;min-width:0;}
+.download-title{font-weight:700;font-size:.95rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.download-meta{font-size:.78rem;color:var(--gray);margin-top:.2rem;}
+.download-actions{display:flex;gap:.5rem;flex-shrink:0;}
+.download-action-btn{
+  width:38px;height:38px;border-radius:8px;background:var(--black-3);border:1px solid var(--border);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;
+}
+.download-action-btn:hover{border-color:var(--red);color:var(--red-2);}
+.download-action-btn.danger:hover{border-color:#ff5b5b;color:#ff5b5b;background:rgba(255,91,91,.1);}
+@media (max-width:576px){
+  .download-title{font-size:.85rem;}
+  .download-meta{font-size:.72rem;}
+  .download-action-btn{width:34px;height:34px;font-size:.8rem;}
+}
 
 /* Top-10 style rank number */
 .card-movie.has-rank{overflow:visible;background:transparent;}
@@ -695,6 +727,7 @@ footer a:hover{color:var(--red-2);}
       <a href="#trending-section" data-nav="trending" onclick="showView('home')">Trending</a>
       <a href="#discover-section" data-nav="discover" onclick="showView('home')">Discover</a>
       <a href="#myListSection" data-nav="mylist" onclick="showView('home')">My List</a>
+      <a href="#" data-nav="downloads" onclick="event.preventDefault();showView('downloads')">Downloads<span class="nav-badge" id="downloadsBadge"></span></a>
       <div class="dropdown genre-dropdown">
         <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Browse</a>
         <ul class="dropdown-menu genre-menu" id="genreMenu"></ul>
@@ -728,6 +761,7 @@ footer a:hover{color:var(--red-2);}
     <a href="#trending-section" onclick="showView('home');closeOffcanvas()"><i class="fa-solid fa-fire me-2"></i>Trending</a>
     <a href="#discover-section" onclick="showView('home');closeOffcanvas()"><i class="fa-solid fa-compass me-2"></i>Discover</a>
     <a href="#myListSection" onclick="showView('home');closeOffcanvas()"><i class="fa-solid fa-bookmark me-2"></i>My List</a>
+    <a href="#" onclick="event.preventDefault();showView('downloads');closeOffcanvas()"><i class="fa-solid fa-download me-2"></i>Downloads</a>
     <hr style="border-color:var(--border);">
     <div class="mb-2" style="font-weight:700;font-size:.85rem;color:var(--gray);">BROWSE BY GENRE</div>
     <div class="chip-row" id="mobileGenreChips"></div>
@@ -853,6 +887,21 @@ footer a:hover{color:var(--red-2);}
   </div>
 </div>
 
+<!-- DOWNLOADS PAGE -->
+<div id="downloadsView" class="container" style="display:none; min-height:60vh; padding-top:1.6rem;">
+  <div class="section-head">
+    <div>
+      <div class="section-title"><i class="fa-solid fa-download"></i> Downloads</div>
+      <div class="section-sub" id="downloadsCount"></div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn-outline-cinvex" style="padding:.5rem 1rem;font-size:.82rem;" id="clearDownloadsBtn" onclick="clearAllDownloads()"><i class="fa-solid fa-trash"></i> Clear All</button>
+      <button class="btn-outline-cinvex" style="padding:.5rem 1rem;font-size:.82rem;" onclick="showView('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    </div>
+  </div>
+  <div id="downloadsList"></div>
+</div>
+
 <!-- DETAIL MODAL -->
 <div class="modal fade" id="detailModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -871,9 +920,9 @@ footer a:hover{color:var(--red-2);}
 <nav id="bottomTabBar">
   <div class="tab-row">
     <a href="#home" class="tab-item active" data-tab="home" onclick="showView('home');setActiveTab('home')"><i class="fa-solid fa-house"></i>Home</a>
-    <a href="#trending-section" class="tab-item" data-tab="trending" onclick="showView('home');setActiveTab('trending')"><i class="fa-solid fa-fire"></i>Trending</a>
     <a href="#" class="tab-item" data-tab="search" onclick="event.preventDefault();focusSearch();setActiveTab('search')"><i class="fa-solid fa-magnifying-glass"></i>Search</a>
     <a href="#discover-section" class="tab-item" data-tab="discover" onclick="showView('home');setActiveTab('discover')"><i class="fa-solid fa-compass"></i>Discover</a>
+    <a href="#" class="tab-item" data-tab="downloads" onclick="event.preventDefault();showView('downloads');setActiveTab('downloads')"><i class="fa-solid fa-download"></i>Downloads</a>
     <a href="#myListSection" class="tab-item" data-tab="mylist" onclick="showView('home');setActiveTab('mylist')"><i class="fa-solid fa-bookmark"></i>My List</a>
   </div>
 </nav>
@@ -926,7 +975,10 @@ footer a:hover{color:var(--red-2);}
    it tries multiple common field names so it keeps working
    even if the API's exact schema differs slightly.
 ========================================================= */
-const API_BASE = "https://cineflix-api.brainsjetai.workers.dev";
+// Requests go through proxy.php (same origin as this page), which forwards them to
+// movieapi.gifted.co.ke server-side — sidesteps the browser CORS block and keeps the
+// Bearer key out of the client-side JS. See proxy.php for the server-side half.
+const API_BASE = "proxy.php";
 
 /* ---------- Genre browse menu (desktop dropdown + mobile chips) ---------- */
 const GENRES = ['Action','Comedy','Drama','Horror','Sci-Fi','Romance','Thriller','Animation','Documentary','Fantasy'];
@@ -983,6 +1035,88 @@ function renderMyListRow(){
   })).join('');
 }
 
+/* ---------- Downloads history (localStorage-backed record of requested downloads) ---------- */
+// Note: this tracks what the user has REQUESTED to download from Cinvex (so they can find
+// and re-trigger it later). It can't know whether the browser's own download actually
+// finished, since v2's sources give a direct CDN URL and the browser handles it from there.
+function getDownloads(){
+  try{ return JSON.parse(localStorage.getItem('cinvex_downloads') || '[]'); }catch(e){ return []; }
+}
+function addDownload(meta){
+  let list = getDownloads();
+  const key = `${meta.id}::${meta.quality}`;
+  list = list.filter(d => `${d.id}::${d.quality}` !== key);
+  list.unshift({ ...meta, downloadedAt: Date.now() });
+  localStorage.setItem('cinvex_downloads', JSON.stringify(list.slice(0, 100)));
+  renderDownloadsView();
+  updateDownloadsBadge();
+}
+function removeDownload(id, quality){
+  const list = getDownloads().filter(d => !(String(d.id) === String(id) && d.quality === quality));
+  localStorage.setItem('cinvex_downloads', JSON.stringify(list));
+  renderDownloadsView();
+  updateDownloadsBadge();
+  toast('Removed from Downloads');
+}
+function clearAllDownloads(){
+  localStorage.removeItem('cinvex_downloads');
+  renderDownloadsView();
+  updateDownloadsBadge();
+  toast('Downloads history cleared');
+}
+function formatDownloadDate(ts){
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay
+    ? `Today, ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`
+    : d.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+}
+function updateDownloadsBadge(){
+  const badge = document.getElementById('downloadsBadge');
+  if(!badge) return;
+  const count = getDownloads().length;
+  badge.textContent = count > 99 ? '99+' : count;
+  badge.classList.toggle('show', count > 0);
+}
+
+function renderDownloadsView(){
+  const listEl = document.getElementById('downloadsList');
+  const countEl = document.getElementById('downloadsCount');
+  const clearBtn = document.getElementById('clearDownloadsBtn');
+  if(!listEl) return;
+  const downloads = getDownloads();
+  clearBtn.style.display = downloads.length ? 'inline-flex' : 'none';
+  if(!downloads.length){
+    countEl.textContent = '';
+    listEl.innerHTML = `
+      <div class="empty-state" style="width:100%;">
+        <i class="fa-solid fa-download"></i>
+        Nothing downloaded yet. When you download a movie or episode, it'll show up here so you can find it again.
+      </div>`;
+    return;
+  }
+  countEl.textContent = `${downloads.length} item${downloads.length > 1 ? 's' : ''}`;
+  listEl.innerHTML = `<div class="downloads-grid">` + downloads.map(d => `
+    <div class="download-row">
+      <img src="${d.poster}" alt="${d.title}" onerror="this.src='https://placehold.co/100x140/141414/e50914?text=CINVEX'">
+      <div class="download-info">
+        <div class="download-title">${d.title}</div>
+        <div class="download-meta">${d.type} · ${d.quality} · ${formatDownloadDate(d.downloadedAt)}</div>
+      </div>
+      <div class="download-actions">
+        <button class="download-action-btn" title="Open title" onclick='openDetail(${JSON.stringify(String(d.id))}, ${JSON.stringify(String(d.slug||""))}, ${JSON.stringify(d.type)})'><i class="fa-solid fa-circle-play"></i></button>
+        <button class="download-action-btn" title="Download again" onclick='reDownload(${JSON.stringify(d.url)}, ${JSON.stringify(d.title)}, ${JSON.stringify(d.quality)})'><i class="fa-solid fa-arrow-rotate-right"></i></button>
+        <button class="download-action-btn danger" title="Remove" onclick='removeDownload(${JSON.stringify(String(d.id))}, ${JSON.stringify(d.quality)})'><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('') + `</div>`;
+}
+function reDownload(url, title, quality){
+  if(!url){ toast('This download link is no longer available — open the title again for fresh links'); return; }
+  window.open(url, '_blank');
+}
+
 /* ---------- Continue Watching (localStorage-backed progress tracking) ---------- */
 function getContinueWatching(){
   try{ return JSON.parse(localStorage.getItem('cinvex_continue') || '[]'); }catch(e){ return []; }
@@ -1024,10 +1158,15 @@ document.getElementById('year').textContent = new Date().getFullYear();
 /* ---------- helpers: field extraction (matched to CONFIRMED real API schema) ---------- */
 // Real shape: { status:"success", data: { subjectList: [ {subjectId, subjectType, title,
 // description, releaseDate, genre:"a,b,c", cover:{url,...}, countryName, imdbRatingValue,
-// imdbRatingCount, detailPath, stills} ], pager } }  — used by /api/trending and /api/search
+// imdbRatingCount, detailPath, stills} ], pager } }  — used by /trending and /search
 function pickArray(json){
   if(!json) return [];
   if(Array.isArray(json)) return json;
+  // Confirmed v2 shape for /search, /trending, /homepage-as-list: { results: { items:[...], pager } }
+  if(json.results && Array.isArray(json.results.items)) return json.results.items;
+  if(json.results && Array.isArray(json.results.subjectList)) return json.results.subjectList;
+  if(Array.isArray(json.results)) return json.results;
+  // Legacy shapes, kept as fallbacks in case an endpoint differs
   if(json.data && Array.isArray(json.data.subjectList)) return json.data.subjectList;
   if(Array.isArray(json.subjectList)) return json.subjectList;
   const candidates = ['results','data','movies','items','trending','list','shows','subjectList'];
@@ -1042,22 +1181,34 @@ function pickArray(json){
   }
   return [];
 }
+// v2 /search doesn't document a type filter param, so apply it client-side.
+// type: 0 = all, 1 = movie, 2 = TV (matches the existing UI's typeFilter select).
+function filterByType(items, type){
+  const t = Number(type);
+  if(!t) return items;
+  const want = t === 2 ? 'TV' : 'Movie';
+  return items.filter(it => getType(it) === want);
+}
 // Homepage has a totally different shape: { data: { operatingList: [ {type, title,
 // subjects:[...], banner:{items:[{subject:{...}}]} } ] } } — a set of shelves, not a flat list.
 function extractShelves(json){
-  const data = json && json.data;
-  if(!data || !Array.isArray(data.operatingList)) return [];
-  const shelves = [];
-  for(const op of data.operatingList){
-    let items = Array.isArray(op.subjects) ? op.subjects.filter(Boolean) : [];
-    if(!items.length && op.banner && Array.isArray(op.banner.items)){
-      items = op.banner.items.map(b => b.subject).filter(Boolean);
+  const data = (json && (json.results || json.data)) || null;
+  if(data && Array.isArray(data.operatingList)){
+    const shelves = [];
+    for(const op of data.operatingList){
+      let items = Array.isArray(op.subjects) ? op.subjects.filter(Boolean) : [];
+      if(!items.length && op.banner && Array.isArray(op.banner.items)){
+        items = op.banner.items.map(b => b.subject).filter(Boolean);
+      }
+      if(items.length){
+        shelves.push({ title: op.title || 'Featured', type: op.type || '', items });
+      }
     }
-    if(items.length){
-      shelves.push({ title: op.title || 'Featured', type: op.type || '', items });
-    }
+    if(shelves.length) return shelves;
   }
-  return shelves;
+  // Unknown/simpler homepage shape from the new API — show whatever list we can find as one shelf.
+  const flat = pickArray(json);
+  return flat.length ? [{ title: 'Featured', type: '', items: flat }] : [];
 }
 function getId(item){
   return item.subjectId ?? item.id ?? item.movieId ?? item._id ?? item.tmdbId ?? item.slug ?? item.detailPath ?? '';
@@ -1120,7 +1271,12 @@ function closeOffcanvas(){
 
 /* ---------- Core fetch wrapper ---------- */
 async function apiGet(path){
-  const url = `${API_BASE}${path}`;
+  // Split "/search/foo?page=1" into pathname + query, then rebuild as
+  // proxy.php?path=/search/foo&page=1 (proxy.php forwards everything but "path" as-is).
+  const [pathname, qs] = path.split('?');
+  const params = new URLSearchParams(qs || '');
+  params.set('path', pathname);
+  const url = `${API_BASE}?${params.toString()}`;
   const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
   const raw = await res.text();
   let json;
@@ -1269,7 +1425,7 @@ const SHELF_ICONS = {
 async function loadHomepage(){
   fillSkeletonRow('homepageSkeletonRow', 8);
   try{
-    const json = await apiGet('/api/homepage', 'GET /api/homepage');
+    const json = await apiGet('/homepage', 'GET /homepage');
     const shelves = extractShelves(json);
     if(!shelves.length){
       document.getElementById('homepageShelves').innerHTML = emptyState('Homepage responded but no usable content was found.', 'loadHomepage');
@@ -1307,7 +1463,7 @@ async function loadHomepage(){
 async function loadTrending(){
   fillSkeletonRow('trendingRow', 8);
   try{
-    const json = await apiGet('/api/trending', 'GET /api/trending');
+    const json = await apiGet('/trending', 'GET /trending');
     const items = pickArray(json);
     if(!items.length){
       document.getElementById('trendingRow').innerHTML = emptyState('No trending titles available right now.', 'loadTrending');
@@ -1360,8 +1516,8 @@ async function loadDiscoverBatch(){
   loaderEl.style.display = 'flex';
   try{
     const term = DISCOVER_TERMS[discoverTermIndex % DISCOVER_TERMS.length];
-    const json = await apiGet(`/api/search/${encodeURIComponent(term)}?page=${discoverPage}&perPage=12&type=${discoverType}`, `Discover: "${term}" p${discoverPage} type${discoverType}`);
-    const items = pickArray(json);
+    const json = await apiGet(`/search/${encodeURIComponent(term)}?page=${discoverPage}`, `Discover: "${term}" p${discoverPage} type${discoverType}`);
+    const items = filterByType(pickArray(json), discoverType);
     const fresh = items.filter(it=>{
       const id = String(getId(it));
       if(discoverSeen.has(id)) return false;
@@ -1444,7 +1600,7 @@ document.addEventListener('click', (e)=>{
 
 async function fetchSuggestions(query){
   try{
-    const json = await apiGet(`/api/search/${encodeURIComponent(query)}?page=1&perPage=6&type=0`, `Suggest: "${query}"`);
+    const json = await apiGet(`/search/${encodeURIComponent(query)}?page=1`, `Suggest: "${query}"`);
     suggestItems = pickArray(json).slice(0,6);
     renderSuggestions(query);
   }catch(e){
@@ -1508,8 +1664,8 @@ async function fetchSearchPage(replace){
   showLoadingBar();
   const { query, page, type } = searchState;
   try{
-    const json = await apiGet(`/api/search/${encodeURIComponent(query)}?page=${page}&perPage=24&type=${type}`);
-    const items = pickArray(json);
+    const json = await apiGet(`/search/${encodeURIComponent(query)}?page=${page}`);
+    const items = filterByType(pickArray(json), type);
     if(replace) document.getElementById('searchGrid').innerHTML = '';
     if(!items.length && page === 1){
       document.getElementById('searchGrid').innerHTML = emptyState(`No results found for "${query}". Try a different title.`);
@@ -1554,10 +1710,16 @@ function hideLoadingBar(){
 function showView(view){
   document.getElementById('homeView').style.display = view==='home' ? 'block' : 'none';
   document.getElementById('searchView').style.display = view==='search' ? 'block' : 'none';
+  document.getElementById('downloadsView').style.display = view==='downloads' ? 'block' : 'none';
   document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
   if(view==='home'){
     const el = document.querySelector('.nav-links a[data-nav="home"]');
     if(el) el.classList.add('active');
+    window.scrollTo({top:0, behavior:'instant'});
+  } else if(view==='downloads'){
+    const el = document.querySelector('.nav-links a[data-nav="downloads"]');
+    if(el) el.classList.add('active');
+    renderDownloadsView();
     window.scrollTo({top:0, behavior:'instant'});
   }
 }
@@ -1627,13 +1789,13 @@ async function openDetail(id, slug, type, autoPlay){
   detailModal.show();
 
   // Try the numeric subjectId first, then fall back to the detailPath slug.
-  // Whichever one succeeds is remembered and reused for /api/sources later,
+  // Whichever one succeeds is remembered and reused for /sources later,
   // since both endpoints should be keyed the same way.
   const candidates = [id, slug].filter(v => v && v !== 'undefined');
   let json = null, resolvedId = null, lastErr = null;
   for(const candidate of candidates){
     try{
-      json = await apiGet(`/api/info/${encodeURIComponent(candidate)}`, `GET /api/info/${candidate}`);
+      json = await apiGet(`/info/${encodeURIComponent(candidate)}`, `GET /info/${candidate}`);
       resolvedId = candidate;
       break;
     }catch(e){ lastErr = e; }
@@ -1651,12 +1813,13 @@ async function openDetail(id, slug, type, autoPlay){
     return;
   }
 
-  // CONFIRMED real shape: { status, data: { subject: {...fields...}, stars: [...cast], resource: {seasons:[...]} } }
+  // v2 shape: { status, results: { subject: {...fields...}, stars: [...cast], resource: {seasons:[...]} } }
+  // Legacy shape kept as a fallback: { status, data: { subject: {...} } }
   // Previous bug: unwrap only ran when `!getTitle(item)`, but getTitle() always returns a
   // fallback string ("Untitled") which is truthy — so the unwrap into `.subject` never fired,
   // and every detail view rendered blank/placeholder data. Now we unwrap unconditionally.
-  let item = json && json.data ? json.data : json;
-  if(item && item.subject) item = { ...item.subject, __cast: item.stars, __resource: item.resource };
+  let item = json && (json.results || json.data) ? (json.results || json.data) : json;
+  if(item && item.subject) item = { ...item.subject, __cast: item.stars || item.cast, __resource: item.resource };
   if(item && item.detail) item = item.detail;
   window._altId = candidates.find(c => c !== resolvedId) || null;
 
@@ -1768,8 +1931,8 @@ async function loadMoreLikeThis(item, currentId, isTV){
   const query = genres[0] || getTitle(item).split(' ')[0];
   const type = isTV ? 2 : 1;
   try{
-    const json = await apiGet(`/api/search/${encodeURIComponent(query)}?page=1&perPage=14&type=${type}`, `More Like This: "${query}"`);
-    let items = pickArray(json).filter(it => String(getId(it)) !== String(currentId));
+    const json = await apiGet(`/search/${encodeURIComponent(query)}?page=1`, `More Like This: "${query}"`);
+    let items = filterByType(pickArray(json), type).filter(it => String(getId(it)) !== String(currentId));
     if(!items.length){
       row.innerHTML = emptyState(`No similar titles found for "${query}" yet.`);
       return;
@@ -1788,20 +1951,29 @@ function selectEpisode(btn, id, season, episode){
   loadSources(id, season, episode, true);
 }
 
-// Dedicated extraction for /api/sources — tries known array locations before
-// CONFIRMED real shape: { status, data: { processedSources:[{quality,directUrl,streamUrl,downloadUrl,...}], downloads:[{resolution,url,...}] } }
-// processedSources is preferred since it already includes correctly-proxied stream/download URLs.
+// Dedicated extraction for /sources — tries known array locations before falling back.
+// Confirmed v2 shape: { status, results: [ {id, quality, download_url, size, format}, ... ] }
+// Legacy shapes kept as fallbacks in case a title returns a different structure.
 function extractSources(json){
   if(!json) return [];
-  const data = json.data ?? json;
+  if(Array.isArray(json.results) && json.results.length) return json.results;
+  const data = json.data ?? json.results ?? json;
   if(Array.isArray(data)) return data;
   if(data && Array.isArray(data.processedSources) && data.processedSources.length) return data.processedSources;
   if(data && Array.isArray(data.downloads) && data.downloads.length) return data.downloads;
-  const keys = ['sources','links','sourceList','qualities','urls','downloadLinks','streams'];
+  const keys = ['sources','links','sourceList','qualities','urls','downloadLinks','streams','items'];
   for(const k of keys){
     if(data && Array.isArray(data[k])) return data[k];
   }
   return pickArray(json);
+}
+// audioTracks[] is documented to ride along in the /sources response, either at the top
+// level or nested under results — check both.
+function extractAudioTracks(json){
+  if(!json) return [];
+  if(Array.isArray(json.audioTracks)) return json.audioTracks;
+  if(json.results && Array.isArray(json.results.audioTracks)) return json.results.audioTracks;
+  return [];
 }
 
 async function loadSources(id, season, episode, autoPlay){
@@ -1813,11 +1985,12 @@ async function loadSources(id, season, episode, autoPlay){
     <div class="skeleton" style="height:44px;"></div>`;
   const suffix = (season && episode) ? `?season=${season}&episode=${episode}` : '';
   const idCandidates = [id, window._altId].filter(Boolean);
-  let json = null, lastErr = null;
+  let json = null, lastErr = null, resolvedSourceId = null;
   for(const candidate of idCandidates){
     try{
-      const path = `/api/sources/${encodeURIComponent(candidate)}${suffix}`;
+      const path = `/sources/${encodeURIComponent(candidate)}${suffix}`;
       json = await apiGet(path, `GET ${path}`);
+      resolvedSourceId = candidate;
       break;
     }catch(e){ lastErr = e; }
   }
@@ -1828,30 +2001,37 @@ async function loadSources(id, season, episode, autoPlay){
   }
   try{
     const sources = extractSources(json);
-    // CONFIRMED real field: data.captions — subtitle tracks for the video player
-    const dataObj = json.data ?? json;
-    window._currentCaptions = Array.isArray(dataObj.captions) ? dataObj.captions : [];
+    const audioTracks = extractAudioTracks(json);
     if(!sources || !sources.length){
       wrap.innerHTML = emptyState('No streaming sources found for this selection yet.');
       return;
     }
+    const urlOf = s => s.download_url || s.directUrl || s.url || s.file || s.link || s.src || s.playUrl || s.videoUrl || s.m3u8 || s.hls || '';
     wrap.innerHTML = `<h6 class="mb-2" style="font-weight:800;"><i class="fa-solid fa-server"></i> Available Qualities</h6>` +
       sources.map((s,i)=>{
-        const qNum = s.quality ?? s.resolution;
-        const quality = qNum ? `${qNum}p` : (s.label || s.quality_label || s.name || `Source ${i+1}`);
-        const url = s.directUrl || s.url || s.file || s.link || s.src || s.playUrl || s.videoUrl || s.m3u8 || s.hls || '';
+        const qRaw = s.quality ?? s.resolution;
+        const quality = qRaw ? (/p$/i.test(String(qRaw)) ? String(qRaw) : `${qRaw}p`) : (s.label || s.quality_label || s.name || `Source ${i+1}`);
+        const url = urlOf(s);
+        const streamId = s.id ?? s.streamId ?? '';
         return `
         <div class="quality-btn">
           <span><i class="fa-solid fa-film"></i> ${quality}</span>
           <span class="d-flex gap-2">
-            <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:.3rem .7rem;" onclick='playSource(${JSON.stringify(url)})'><i class="fa-solid fa-play"></i></button>
+            <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:.3rem .7rem;" onclick='playSource(${JSON.stringify(url)}, ${JSON.stringify(String(resolvedSourceId))}, ${JSON.stringify(String(streamId))})'><i class="fa-solid fa-play"></i></button>
             <button class="btn btn-sm" style="background:var(--black-3);color:#fff;border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;" onclick='downloadSource(${JSON.stringify(url)}, ${JSON.stringify(quality)})'><i class="fa-solid fa-download"></i></button>
           </span>
         </div>`;
       }).join('');
+    // Audio dubs: each track is a separate subject — offer a quick way to load its sources instead.
+    if(audioTracks.length > 1){
+      wrap.innerHTML += `<h6 class="mt-3 mb-2" style="font-weight:800;"><i class="fa-solid fa-language"></i> Audio</h6>
+        <div class="d-flex flex-wrap gap-2">
+          ${audioTracks.map(t => `<button class="filter-chip ${t.isOriginal ? 'active' : ''}" onclick='loadSources(${JSON.stringify(String(t.subjectId))}, ${JSON.stringify(season)}, ${JSON.stringify(episode)}, false)'>${t.language || t.languageCode || 'Audio'}</button>`).join('')}
+        </div>`;
+    }
     if(autoPlay && sources[0]){
       const first = sources[0];
-      playSource(first.url || first.file || first.link || first.streamUrl || first.src || first.playUrl || '');
+      playSource(urlOf(first), resolvedSourceId, first.id ?? first.streamId ?? '');
     }
   }catch(e){
     console.error(e);
@@ -1859,28 +2039,18 @@ async function loadSources(id, season, episode, autoPlay){
   }
 }
 
-function playSource(url){
+async function playSource(url, subjectId, streamId){
   if(!url){ toast('No playable URL found for this source'); return; }
   const box = document.getElementById('playerBox');
   box.style.display = 'block';
-  const proxied = `${API_BASE}/api/stream?url=${encodeURIComponent(url)}`;
-  const captions = window._currentCaptions || [];
-  const tracks = captions.map((c,i) => {
-    const src = c.url || c.file || c.src || '';
-    const lang = c.lang || c.language || c.srclang || 'en';
-    const label = c.label || c.name || lang.toUpperCase();
-    if(!src) return '';
-    return `<track kind="subtitles" src="${src}" srclang="${lang}" label="${label}" ${i===0 ? 'default' : ''}>`;
-  }).join('');
 
   box.innerHTML = `
     <div class="player-shell" id="playerShell">
       <video id="cinvexVideo" controls autoplay playsinline preload="metadata">
-        <source src="${proxied}">
-        ${tracks}
+        <source src="${url}">
       </video>
       <div class="player-extra-controls">
-        ${captions.length ? `<button class="player-btn" id="ccBtn" title="Subtitles/CC"><i class="fa-solid fa-closed-captioning"></i></button>` : ''}
+        <button class="player-btn" id="ccBtn" title="Subtitles/CC" style="display:none;"><i class="fa-solid fa-closed-captioning"></i></button>
         <button class="player-btn" id="rotateLockBtn" title="Lock rotation" style="display:none;"><i class="fa-solid fa-lock-open"></i></button>
         <button class="player-btn" id="fullscreenBtn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
       </div>
@@ -1931,14 +2101,34 @@ function playSource(url){
     }
   });
 
-  if(ccBtn){
-    let ccOn = true;
-    ccBtn.addEventListener('click', ()=>{
-      ccOn = !ccOn;
-      Array.from(video.textTracks).forEach(t => t.mode = ccOn ? 'showing' : 'hidden');
-      ccBtn.classList.toggle('active', ccOn);
-    });
-    ccBtn.classList.add('active');
+  // Captions are a dedicated endpoint on v2: GET /captions/{subjectId}/{streamId}.
+  // Fetch best-effort and inject <track> elements once they arrive — playback isn't blocked on this.
+  if(subjectId && streamId){
+    try{
+      const json = await apiGet(`/captions/${encodeURIComponent(subjectId)}/${encodeURIComponent(streamId)}?format=MP4`);
+      const captions = (json && json.results && Array.isArray(json.results.captions)) ? json.results.captions : [];
+      if(captions.length && document.getElementById('cinvexVideo') === video){
+        captions.forEach((c,i)=>{
+          const src = c.url || c.file || c.src || '';
+          if(!src) return;
+          const track = document.createElement('track');
+          track.kind = 'subtitles';
+          track.src = src;
+          track.srclang = c.languageCode || 'en';
+          track.label = c.language || (c.languageCode || 'EN').toUpperCase();
+          if(i === 0) track.default = true;
+          video.appendChild(track);
+        });
+        ccBtn.style.display = 'inline-flex';
+        let ccOn = true;
+        ccBtn.addEventListener('click', ()=>{
+          ccOn = !ccOn;
+          Array.from(video.textTracks).forEach(t => t.mode = ccOn ? 'showing' : 'hidden');
+          ccBtn.classList.toggle('active', ccOn);
+        });
+        ccBtn.classList.add('active');
+      }
+    }catch(e){ /* captions are optional — silently ignore failures */ }
   }
 
   // ---- Continue Watching: track playback progress against the currently open title ----
@@ -1958,8 +2148,15 @@ function playSource(url){
 function downloadSource(url, quality){
   if(!url){ toast('No download URL found for this source'); return; }
   const title = document.querySelector('#detailBody h2')?.textContent?.trim() || 'cinvex-download';
-  const dl = `${API_BASE}/api/download?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&quality=${encodeURIComponent(quality)}`;
-  window.open(dl, '_blank');
+  window.open(url, '_blank');
+
+  const meta = window._currentMovieMeta;
+  if(meta){
+    addDownload({ id: meta.id, slug: meta.slug, title: meta.title, poster: meta.poster, type: meta.type, quality, url });
+  } else {
+    addDownload({ id: title, slug: '', title, poster: '', type: 'Movie', quality, url });
+  }
+  toast('Download started — saved to your Downloads page');
 }
 
 /* ---------- BACK TO TOP + NETFLIX-STYLE NAV SOLIDIFY ---------- */
@@ -2035,6 +2232,7 @@ function attachRowArrows(){
   initScrollReveal();
   renderMyListRow();
   renderContinueWatchingRow();
+  updateDownloadsBadge();
   setTimeout(attachRowArrows, 500);
 
   Promise.allSettled([homepageDone, trendingDone]).then(hideSplash);
