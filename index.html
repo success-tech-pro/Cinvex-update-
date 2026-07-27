@@ -975,10 +975,11 @@ footer a:hover{color:var(--red-2);}
    it tries multiple common field names so it keeps working
    even if the API's exact schema differs slightly.
 ========================================================= */
-// Requests go through proxy.php (same origin as this page), which forwards them to
-// movieapi.gifted.co.ke server-side — sidesteps the browser CORS block and keeps the
-// Bearer key out of the client-side JS. See proxy.php for the server-side half.
-const API_BASE = "proxy.php";
+// Requests go through /api/proxy (a Vercel serverless function, same origin as this
+// page), which forwards them to movieapi.gifted.co.ke server-side — sidesteps the
+// browser CORS block and keeps the Bearer key out of the client-side JS.
+// See api/proxy.js for the server-side half.
+const API_BASE = "/api/proxy";
 
 /* ---------- Genre browse menu (desktop dropdown + mobile chips) ---------- */
 const GENRES = ['Action','Comedy','Drama','Horror','Sci-Fi','Romance','Thriller','Animation','Documentary','Fantasy'];
