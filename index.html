@@ -1272,25 +1272,31 @@ function closeOffcanvas(){
 
 /* ---------- Core fetch wrapper ---------- */
 async function apiGet(path){
+  const MAX_ATTEMPTS = 3;
   // Split "/search/foo?page=1" into pathname + query, then rebuild as
-  // proxy.php?path=/search/foo&page=1 (proxy.php forwards everything but "path" as-is).
+  // /api/proxy?path=/search/foo&page=1 (the proxy forwards everything but "path" as-is).
   const [pathname, qs] = path.split('?');
   const params = new URLSearchParams(qs || '');
   params.set('path', pathname);
   const url = `${API_BASE}?${params.toString()}`;
-  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  const raw = await res.text();
-  let json;
-  try{ json = JSON.parse(raw); }
-  catch(parseErr){
-    console.error(`Non-JSON response from ${path} (HTTP ${res.status})`, raw.slice(0,300));
-    throw new Error(`Non-JSON response (HTTP ${res.status})`);
+
+  for(let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++){
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const raw = await res.text();
+    let json;
+    try{ json = JSON.parse(raw); }
+    catch(parseErr){
+      console.error(`Non-JSON response from ${path} (HTTP ${res.status})`, raw.slice(0,300));
+      throw new Error(`Non-JSON response (HTTP ${res.status})`);
+    }
+    if(res.ok) return json;
+    // The upstream API is occasionally flaky (transient 5xx) — retry those with a short
+    // backoff before giving up. Don't retry 4xx (auth/bad request) since those won't change.
+    const isRetryable = res.status >= 500 && attempt < MAX_ATTEMPTS;
+    console.error(`API error ${res.status} from ${path}${isRetryable ? ` — retrying (${attempt}/${MAX_ATTEMPTS})` : ''}`, raw.slice(0,300));
+    if(!isRetryable) throw new Error(`API error ${res.status}`);
+    await new Promise(r => setTimeout(r, 500 * attempt));
   }
-  if(!res.ok){
-    console.error(`API error ${res.status} from ${path}`, raw.slice(0,300));
-    throw new Error(`API error ${res.status}`);
-  }
-  return json;
 }
 
 function toast(msg){
