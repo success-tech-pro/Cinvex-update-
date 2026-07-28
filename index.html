@@ -1273,10 +1273,12 @@ function closeOffcanvas(){
 /* ---------- Core fetch wrapper ---------- */
 async function apiGet(path){
   const MAX_ATTEMPTS = 3;
-  // The proxy is a catch-all route that mirrors the real API's URL shape,
-  // e.g. "/search/avatar?page=1" -> "/api/proxy/search/avatar?page=1" — no
-  // re-encoding needed, so we just append the path as-is.
-  const url = `${API_BASE}${path}`;
+  // path already contains encodeURIComponent-encoded segments (from the call
+  // sites below), so we append it to "path=" directly — NOT through
+  // URLSearchParams.set(), which would re-encode the existing % escapes
+  // (e.g. "%20" -> "%2520") and corrupt the value on the way to the proxy.
+  const [pathname, qs] = path.split('?');
+  const url = `${API_BASE}?path=${pathname}${qs ? '&' + qs : ''}`;
 
   for(let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++){
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
