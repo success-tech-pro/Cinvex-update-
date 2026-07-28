@@ -14,7 +14,11 @@
 // matches the single encodeURIComponent() the front-end applies, so nothing gets
 // double-encoded or corrupted.
 
-const REMOTE_BASE = 'https://movieapi.gifted.co.ke/api/v2';
+// FIX: this was pointed at "movieapi.gifted.co.ke" — missing "tech". The real
+// Gifted Tech API (creator: "GiftedTech" in every response) lives at
+// giftedtech.co.ke. The typo'd host doesn't resolve, so every single endpoint
+// failed identically (all 502s from the catch block below).
+const REMOTE_BASE = 'https://movieapi.giftedtech.co.ke/api/v2';
 const API_KEY = 'gifted_movieapi_789fbud2389889dg8962e098g23d6';
 
 module.exports = async (req, res) => {
