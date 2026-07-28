@@ -14,11 +14,7 @@
 // matches the single encodeURIComponent() the front-end applies, so nothing gets
 // double-encoded or corrupted.
 
-// FIX: this was pointed at "movieapi.gifted.co.ke" — missing "tech". The real
-// Gifted Tech API (creator: "GiftedTech" in every response) lives at
-// giftedtech.co.ke. The typo'd host doesn't resolve, so every single endpoint
-// failed identically (all 502s from the catch block below).
-const REMOTE_BASE = 'https://movieapi.giftedtech.co.ke/api/v2';
+const REMOTE_BASE = 'https://movieapi.gifted.co.ke/api/v2';
 const API_KEY = 'gifted_movieapi_789fbud2389889dg8962e098g23d6';
 
 module.exports = async (req, res) => {
@@ -49,6 +45,11 @@ module.exports = async (req, res) => {
       headers: {
         'Authorization': `Bearer ${API_KEY}`,
         'Accept': 'application/json',
+        // Some APIs block requests that don't look like they came from a real
+        // browser (no User-Agent at all is a classic bot signal) — Node's fetch
+        // sends no User-Agent by default, so we add one just in case that's
+        // what's tripping anti-bot protection on the upstream host.
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       },
     });
     const body = await upstream.text();
@@ -56,6 +57,15 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json');
     res.send(body);
   } catch (err) {
-    res.status(502).json({ error: 'Upstream request failed', details: String(err) });
+    // FIX: String(err) on a fetch failure just prints "TypeError: fetch failed"
+    // and hides the actual reason (DNS failure, connection refused, connection
+    // reset, TLS error, etc.), which lives on err.cause. Surface it so we can
+    // actually diagnose what's happening between Vercel and the upstream host.
+    res.status(502).json({
+      error: 'Upstream request failed',
+      details: String(err),
+      cause: err && err.cause ? String(err.cause) : null,
+      code: err && err.cause && err.cause.code ? err.cause.code : null,
+    });
   }
 };
