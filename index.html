@@ -1273,7 +1273,7 @@ function closeOffcanvas(){
 /* ---------- Core fetch wrapper ---------- */
 async function apiGet(path){
   const MAX_ATTEMPTS = 3;
-  // The proxy is now a catch-all route that mirrors the real API's URL shape,
+  // The proxy is a catch-all route that mirrors the real API's URL shape,
   // e.g. "/search/avatar?page=1" -> "/api/proxy/search/avatar?page=1" — no
   // re-encoding needed, so we just append the path as-is.
   const url = `${API_BASE}${path}`;
